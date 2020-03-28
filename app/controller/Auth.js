@@ -1,4 +1,7 @@
 const User = require('../model/User')
+const { createError } = require('../../util')
+
+const userExists = async (username) => User.findOne({ username })
 
 module.exports.register = async (req, res) => {
     const body = req.body
@@ -6,11 +9,19 @@ module.exports.register = async (req, res) => {
     const username = body.username
     const password = body.password
 
-    const savedUser = await new User({
-        name: name,
-        username: username,
-        password: password
-    }).save()
+    try {
+        const exists = await userExists(username)
+        if (exists) createError(409, "User already exists")
+        const [err, savedUser] = await new User({
+            name: name,
+            username: username,
+            password: password
+        }).save().then(user => [null, user]).catch(err => [null, err])
+        if (err) createError(422, "Could not insert into database " + err.message)
+        if (!savedUser) createError(400, "Something went wrong")
 
-    res.status(200).json({ id: savedUser._id })
+        res.status(200).json({ id: savedUser._id })
+    } catch (error) {
+        res.status(error.errorCode || 400).json({ error: error.message })
+    }
 }
