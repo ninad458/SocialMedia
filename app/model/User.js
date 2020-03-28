@@ -12,8 +12,12 @@ const UserSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true
+        required: true,
     }
 })
+
+UserSchema.methods.comparePasswords = function (attempt) {
+    return this.password == attempt
+}
 
 module.exports = mongoose.model("Users", UserSchema)

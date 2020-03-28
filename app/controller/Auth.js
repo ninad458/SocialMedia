@@ -27,3 +27,23 @@ module.exports.register = async (req, res) => {
         res.status(error.errorCode || 400).json({ error: error.message })
     }
 }
+
+module.exports.login = async (req, res) => {
+    const body = req.body
+    const username = body.username
+    const password = body.password
+
+    try {
+        const user = await userExists(username)
+        if (!user) createError(404, "User by that username not found")
+
+        const correct = user.comparePasswords(password)
+
+        if (correct == false) createError(401, "Password is incorrect for the given username")
+
+        const token = await generateToken(user)
+        res.status(200).json({ token: token })
+    } catch (error) {
+        res.status(error.errorCode || 400).json({ message: error.message })
+    }
+}
