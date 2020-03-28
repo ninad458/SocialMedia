@@ -1,5 +1,5 @@
 const User = require('../model/User')
-const { createError } = require('../../util')
+const { createError, generateToken } = require('../../util')
 
 const userExists = async (username) => User.findOne({ username })
 
@@ -20,7 +20,9 @@ module.exports.register = async (req, res) => {
         if (err) createError(422, "Could not insert into database " + err.message)
         if (!savedUser) createError(400, "Something went wrong")
 
-        res.status(200).json({ id: savedUser._id })
+        const token = await generateToken(savedUser)
+
+        res.status(201).json({ token: token })
     } catch (error) {
         res.status(error.errorCode || 400).json({ error: error.message })
     }
