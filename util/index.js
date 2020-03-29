@@ -9,3 +9,5 @@ module.exports.generateToken = async (user) => Promise.resolve(jwt.sign({
     username: user.username,
     name: user.name
 }, SALT))
+
+module.exports.verifyToken = (token) => jwt.verify(token, SALT)
