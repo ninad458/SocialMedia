@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const loadModels = () => {
     require('../app/model/User')
+    require('../app/model/Post')
 }
 
 module.exports = () => {
