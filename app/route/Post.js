@@ -2,6 +2,9 @@ const router = require('express').Router()
 const PostController = require('../controller/Post')
 const { requiresAuthorization } = require('../middleware')
 
-router.post("/", requiresAuthorization, PostController.createPost)
+router.route("/")
+    .all(requiresAuthorization)
+    .post(PostController.createPost)
+    .get(PostController.getPosts)
 
 module.exports = router
