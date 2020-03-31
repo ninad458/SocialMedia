@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const loadModels = () => {
     require('../app/model/User')
     require('../app/model/Post')
+    require('../app/model/Comment')
 }
 
 module.exports = () => {
