@@ -34,9 +34,10 @@ module.exports.createPost = async (req, res) => {
 module.exports.getPosts = async (req, res) => {
     const count = parseInt(req.query.count || 30)
     const page = parseInt(req.query.page || 1)
-    const posts = await Post.find({}).select("-__v ")
+    const [err, posts] = await Post.find({}).select("-__v ")
         .limit(count)
         .skip((page - 1) * count)
-        .sort({ "date": -1 })
+        .sort({ "date": -1 }).then(posts => [null, posts]).catch(e => [e, null])
+    if (err) res.status(422).json({ message: err.message })
     res.status(200).json({ posts: posts })
 }
