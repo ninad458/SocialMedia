@@ -1,4 +1,5 @@
 const Post = require('../model/Post')
+const Comment = require('../model/Comment')
 const User = require('../model/User')
 
 const { createError } = require('../../util')
@@ -26,6 +27,29 @@ module.exports.createPost = async (req, res) => {
 
         res.status(201).json({ postId: savedPost._id })
 
+    } catch (error) {
+        res.status(error.errorCode || 400).json({ message: error.message })
+    }
+}
+
+module.exports.getPost = async (req, res) => {
+    try {
+        const postId = req.params.postId
+        const postPromise = Post.findOne({ _id: postId }).select('-_id -__v').then(post => [null, post]).catch(err => [err, null])
+        const commentsPromise = Comment.find({ postId: postId })
+            .limit(10).select('-postId -_id -__v').sort({ createdAt: -1 }).then(comms => [null, comms]).catch(err => [err, null])
+
+        const [[postErr, post], [comErr, comments]] = await Promise.all([postPromise, commentsPromise])
+        if (postErr) createError(422, "Something went wrong " + postErr.message)
+        if (comErr) createError(422, "Something went wrong " + comErr.message)
+        if (!comments || !post) createError(400, "Something went wrong")
+        res.status(200).json({
+            post: post.post,
+            postBy: post.by,
+            noOfComments: post.noOfComments,
+            date: post.date,
+            comments: comments
+        })
     } catch (error) {
         res.status(error.errorCode || 400).json({ message: error.message })
     }

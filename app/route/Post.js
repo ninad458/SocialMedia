@@ -8,6 +8,9 @@ router.route("/")
     .post(PostController.createPost)
     .get(PostController.getPosts)
 
+router.route('/:postId')
+    .all(requiresAuthorization)
+    .get(PostController.getPost)
 
 Comment(router.route('/:postId/comments').all(requiresAuthorization))
 
