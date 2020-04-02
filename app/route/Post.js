@@ -11,6 +11,7 @@ router.route("/")
 router.route('/:postId')
     .all(requiresAuthorization)
     .get(PostController.getPost)
+    .delete(PostController.deletePost)
 
 Comment(router.route('/:postId/comments').all(requiresAuthorization))
 

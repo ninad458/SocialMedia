@@ -42,7 +42,8 @@ module.exports.getPost = async (req, res) => {
         const [[postErr, post], [comErr, comments]] = await Promise.all([postPromise, commentsPromise])
         if (postErr) createError(422, "Something went wrong " + postErr.message)
         if (comErr) createError(422, "Something went wrong " + comErr.message)
-        if (!comments || !post) createError(400, "Something went wrong")
+        if (!post) createError(404, "Post doesn't exist by that id")
+        if (!comments) createError(400, "Something went wrong")
         res.status(200).json({
             post: post.post,
             postBy: post.by,
@@ -50,6 +51,22 @@ module.exports.getPost = async (req, res) => {
             date: post.date,
             comments: comments
         })
+    } catch (error) {
+        res.status(error.errorCode || 400).json({ message: error.message })
+    }
+}
+
+module.exports.deletePost = async (req, res) => {
+    try {
+        const postId = req.params.postId
+        const [postErr, post] = await Post.findOne({ _id: postId })
+            .select('-_id -__v').then(post => [null, post]).catch(err => [err, null])
+        if (postErr) createError(422, "Something went wrong " + postErr.message)
+        if (!post) createError(404, "Post doesn't exist by that id")
+        if (res.user.username != post.by.username) createError(401, "You don't have the authorization to delete that post")
+        const [err, deleted] = await Post.deleteOne({ _id: postId }).then(post => [null, post]).catch(err => [err, null])
+        if (err) createError(422, err.message)
+        else res.status(200).json({message:"Post Successfully deleted"})
     } catch (error) {
         res.status(error.errorCode || 400).json({ message: error.message })
     }
