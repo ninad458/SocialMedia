@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+const Post = require('./Post')
 
 const CommentSchema = mongoose.Schema({
     comment: {
@@ -24,6 +25,10 @@ const CommentSchema = mongoose.Schema({
         type: Date,
         default: Date.now
     }
+})
+
+CommentSchema.post('save', async function (next) {
+    await Post.findOneAndUpdate({ _id: this.postId }, { $inc: { noOfComments: 1 } })
 })
 
 module.exports = mongoose.model('Comments', CommentSchema)
