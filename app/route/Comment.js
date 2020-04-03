@@ -1,5 +1,6 @@
 const CommentController = require('../controller/Comment')
+const CommentValidator = require('../controller/validators/Comment')
 
 module.exports = (router) => router
     .get(CommentController.getCommentsOnAPost)
-    .post(CommentController.writeComment)
+    .post(CommentValidator.addComment, CommentController.writeComment)

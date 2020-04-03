@@ -1,11 +1,12 @@
 const router = require('express').Router()
 const PostController = require('../controller/Post')
+const PostValidator = require('../controller/validators/Post')
 const { requiresAuthorization } = require('../middleware')
 const Comment = require('./Comment')
 
 router.route("/")
     .all(requiresAuthorization)
-    .post(PostController.createPost)
+    .post(PostValidator.addPost, PostController.createPost)
     .get(PostController.getPosts)
 
 router.route('/:postId')
